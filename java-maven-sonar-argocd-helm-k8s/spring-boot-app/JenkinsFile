@@ -10,6 +10,9 @@ pipeline {
       steps {
         sh 'echo passed'
         git branch: 'main', url: 'https://github.com/mahiavi/java_app.git'
+    pwd
+    git status
+    ls -la .git
       }
     }
     stage('Build and Test') {
