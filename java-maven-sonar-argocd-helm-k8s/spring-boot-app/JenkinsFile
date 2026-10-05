@@ -7,14 +7,24 @@ pipeline {
   }
   stages {
     stage('Checkout') {
-      steps {
-        sh 'echo passed'
+    steps {
+        sh '''
+            echo "Before checkout:"
+            pwd
+            ls -la
+        '''
+
         git branch: 'main', url: 'https://github.com/mahiavi/java_app.git'
-        pwd
-        git status
-        ls -la .git
-      }
+
+        sh '''
+            echo "After checkout:"
+            pwd
+            ls -la
+            git status
+            ls -la .git
+        '''
     }
+}
     stage('Build and Test') {
       steps {
         sh 'ls -ltr'
