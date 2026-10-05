@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       image 'avinash0011/maven-docker-agent:v2'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
+      args '--user root -v /var/run/docker.sock:/var/run/docker.sock -v $WORKSPACE:$WORKSPACE'
     }
   }
   stages {
@@ -10,6 +10,7 @@ pipeline {
       steps {
         sh 'echo passed'
         checkout scm
+        sh 'pwd && ls -la'
       }
     }
     stage('Build and Test') {
@@ -61,13 +62,18 @@ pipeline {
         GIT_USER_NAME = "mahiavi"
       }
       steps {
-        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'crede', variable: 'GITHUB_TOKEN')]) {
             sh '''
+                # Verify we're in a git repository
+                git rev-parse --git-dir || exit 1
+                
                 git config user.email "avinashavi0011@gmail.com"
                 git config user.name "mahiavi"
 
+                # Update the deployment file
                 sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml
 
+                # Verify changes were made before committing
                 if git diff --exit-code java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml > /dev/null; then
                     echo "No changes to commit"
                     exit 0
